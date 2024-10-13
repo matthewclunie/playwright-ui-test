@@ -1,10 +1,12 @@
+import { Page } from "playwright";
+
 const { test, expect } = require("@playwright/test");
 const loginJSON = require("../Utils/login-info.json");
 const lockedOutJSON = require("../Utils/bad-login-info.json");
 const loginData = JSON.parse(JSON.stringify(loginJSON));
 const badUserData = JSON.parse(JSON.stringify(lockedOutJSON));
 
-const errorMessageCheck = async (page) => {
+const errorMessageCheck = async (page: Page) => {
   await expect(page.locator(".svg-inline--fa").first()).toBeVisible();
   await expect(page.locator(".svg-inline--fa").nth(1)).toBeVisible();
   const errorButton = page.locator('[data-test="error-button"]');
@@ -13,7 +15,7 @@ const errorMessageCheck = async (page) => {
   await expect(errorButton).not.toBeVisible();
 };
 
-const login = async (userName, password) => {
+const login = async (page: Page, userName: string, password: string) => {
   await page.goto("https://www.saucedemo.com/");
   await page.getByPlaceholder("Username").fill(userName);
   await page.getByPlaceholder("Password").fill(password);
@@ -31,7 +33,7 @@ test("Check for login page content", async ({ page }) => {
 
 loginData.forEach((data) => {
   test(`${data.userName} should log in successfully`, async ({ page }) => {
-    await login(data.userName, data.password);
+    await login(page, data.userName, data.password);
     await page.locator("#login-button").click();
     await page.waitForURL("https://www.saucedemo.com/inventory.html");
   });
@@ -39,6 +41,7 @@ loginData.forEach((data) => {
 
 test("incorrect username correct password", async ({ page }) => {
   await login(
+    page,
     badUserData.incorrect_userName.userName,
     badUserData.incorrect_userName.password
   );
@@ -51,6 +54,7 @@ test("incorrect username correct password", async ({ page }) => {
 
 test("correct username incorrect password", async ({ page }) => {
   await login(
+    page,
     badUserData.incorrect_password.userName,
     badUserData.incorrect_password.password
   );
@@ -65,14 +69,15 @@ test("correct username incorrect password", async ({ page }) => {
 
 test("error text should appear for locked_out_user", async ({ page }) => {
   await login(
+    page,
     badUserData.locked_out_user.userName,
     badUserData.locked_out_user.password
   );
   await page.locator("#login-button").click();
   await expect(page.locator("/svg-inline--fa").first()).toBeVisible();
   await expect(page.locator("/svg-inline--fa").nth(1)).toBeVisible();
-  await expect(page.getByText(errorMessage)).toHaveText(
-    lockedOutUserData.errorMessage
-  );
+  await expect(
+    page.getByText(badUserData.lockedOutUserData.errorMessage)
+  ).toHaveText(badUserData.lockedOutUserData.errorMessage);
   await errorMessageCheck(page);
 });
