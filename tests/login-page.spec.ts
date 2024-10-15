@@ -1,5 +1,10 @@
 import { Page } from "playwright";
 
+interface LoginData {
+  userName: string;
+  password: string;
+}
+
 const { test, expect } = require("@playwright/test");
 const loginJSON = require("../Utils/login-info.json");
 const lockedOutJSON = require("../Utils/bad-login-info.json");
@@ -7,8 +12,9 @@ const loginData = JSON.parse(JSON.stringify(loginJSON));
 const badUserData = JSON.parse(JSON.stringify(lockedOutJSON));
 
 const errorMessageCheck = async (page: Page) => {
-  await expect(page.locator(".svg-inline--fa").first()).toBeVisible();
-  await expect(page.locator(".svg-inline--fa").nth(1)).toBeVisible();
+  const errorInputIcon = page.locator(".svg-inline--fa");
+  await expect(errorInputIcon.first()).toBeVisible();
+  await expect(errorInputIcon.nth(1)).toBeVisible();
   const errorButton = page.locator('[data-test="error-button"]');
   await expect(errorButton).toBeVisible();
   await errorButton.click();
@@ -31,7 +37,7 @@ test("Check for login page content", async ({ page }) => {
   await expect(page.locator(".login_password")).toBeVisible();
 });
 
-loginData.forEach((data) => {
+loginData.forEach((data: LoginData) => {
   test(`${data.userName} should log in successfully`, async ({ page }) => {
     await login(page, data.userName, data.password);
     await page.locator("#login-button").click();
@@ -53,14 +59,15 @@ test("incorrect username correct password", async ({ page }) => {
 });
 
 test("correct username incorrect password", async ({ page }) => {
+  const errorInputIcon = page.locator(".svg-inline--fa");
   await login(
     page,
     badUserData.incorrect_password.userName,
     badUserData.incorrect_password.password
   );
   await page.getByRole("button", { name: "Login" }).click();
-  await expect(page.locator("/svg-inline--fa").first()).toBeVisible();
-  await expect(page.locator("/svg-inline--fa").nth(1)).toBeVisible();
+  await expect(errorInputIcon.first()).toBeVisible();
+  await expect(errorInputIcon.nth(1)).toBeVisible();
   await expect(page.getByRole("heading", { level: 3 })).toHaveText(
     badUserData.incorrect_userName.errorMessage
   );
@@ -68,16 +75,17 @@ test("correct username incorrect password", async ({ page }) => {
 });
 
 test("error text should appear for locked_out_user", async ({ page }) => {
+  const errorInputIcon = page.locator(".svg-inline--fa");
   await login(
     page,
     badUserData.locked_out_user.userName,
     badUserData.locked_out_user.password
   );
   await page.locator("#login-button").click();
-  await expect(page.locator("/svg-inline--fa").first()).toBeVisible();
-  await expect(page.locator("/svg-inline--fa").nth(1)).toBeVisible();
+  await expect(errorInputIcon.first()).toBeVisible();
+  await expect(errorInputIcon.nth(1)).toBeVisible();
   await expect(
-    page.getByText(badUserData.lockedOutUserData.errorMessage)
-  ).toHaveText(badUserData.lockedOutUserData.errorMessage);
+    page.getByText(badUserData.locked_out_user.errorMessage)
+  ).toHaveText(badUserData.locked_out_user.errorMessage);
   await errorMessageCheck(page);
 });
