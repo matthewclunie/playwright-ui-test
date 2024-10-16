@@ -34,7 +34,7 @@ test("Check for inventory page content", async ({ page }) => {
   await expect(options).toHaveCount(4);
 
   const products = page.locator(".inventory_item");
-  const productsCount = await products.length();
+  const productsCount = await products.count();
 
   for (let i = 0; i < productsCount; i++) {
     const product = await products.nth(i);
