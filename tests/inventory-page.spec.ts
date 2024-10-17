@@ -1,7 +1,12 @@
 import exp from "constants";
-import { Locator } from "playwright";
+import { Locator, Page } from "playwright";
 
 const { test, expect } = require("@playwright/test");
+
+interface FooterLink {
+  identifier: string;
+  url: string;
+}
 
 const optionsJSON = require("../Utils/dropdown-info.json");
 const optionsData = JSON.parse(JSON.stringify(optionsJSON));
@@ -153,17 +158,70 @@ test("Check product links work", async ({ page }) => {
   }
 });
 
-// test("Check nav bar works", async ({ page }) => {
-//   console.log("placeholder");
-// });
+test("Check nav bar works", async ({ context, page }) => {
+  await page.goto("https://www.saucedemo.com/inventory.html");
+  await page.locator("#react-burger-menu-btn").click();
+  await page.locator("#about_sidebar_link").click();
+  await expect(page).toHaveURL("https://saucelabs.com/");
+  await page.goBack();
+  await page.locator("#add-to-cart-sauce-labs-backpack").click();
+  await expect(page.locator(".shopping_cart_badge")).toHaveText("1");
+  await page.locator("#react-burger-menu-btn").click();
+  await page.locator("#reset_sidebar_link").click();
+  await expect(page.locator(".shopping_cart_badge")).not.toBeVisible();
+  await page.locator("#react-burger-cross-btn").click();
+  await expect(page.locator(".bm-item-list")).not.toBeVisible();
+  await page.locator(".shopping_cart_link").click();
+  await expect(page).toHaveURL("https://www.saucedemo.com/cart.html");
+  await page.locator("#react-burger-menu-btn").click();
+  await page.locator("#inventory_sidebar_link").click();
+  await expect(page.locator(".bm-item-list")).not.toBeVisible();
+  await expect(page).toHaveURL("https://www.saucedemo.com/inventory.html");
+  const loggedInCookies = await context.cookies("https://www.saucedemo.com/");
+  await expect(loggedInCookies.length).toBeGreaterThan(0);
+  await page.locator("#react-burger-menu-btn").click();
+  await page.locator("#logout_sidebar_link").click();
+  await expect(page).toHaveURL("https://www.saucedemo.com/");
+  const loggedOutCookies = await context.cookies("https://www.saucedemo.com/");
+  await expect(loggedOutCookies.length).toBe(0);
+});
 
-// test("Check footer links work", async ({ page }) => {
-//   console.log("placeholder");
-// });
+test("Check footer", async ({ page }) => {
+  const footerText =
+    "© 2024 Sauce Labs. All Rights Reserved. Terms of Service | Privacy Policy";
 
-// test("Check add to cart buttons work", async ({ page }) => {
-//   console.log("placeholder");
-// });
+  const footerLinks: FooterLink[] = [
+    { identifier: ".social_twitter", url: "https://x.com/saucelabs?mx=2" },
+    {
+      identifier: ".social_facebook",
+      url: "https://www.facebook.com/saucelabs",
+    },
+    {
+      identifier: ".social_linkedin",
+      url: "https://www.linkedin.com/company/sauce-labs/",
+    },
+  ];
+
+  const checkFooterLink = async (
+    page: Page,
+    identifier: string,
+    url: string
+  ) => {
+    const newTabPromise = page.waitForEvent("popup");
+    await page.locator(identifier).click();
+    const newTab = await newTabPromise;
+    await expect(newTab).toHaveURL(url);
+    await newTab.close();
+  };
+
+  await page.goto("https://www.saucedemo.com/inventory.html");
+
+  for (const footerLink of footerLinks) {
+    await checkFooterLink(page, footerLink.identifier, footerLink.url);
+  }
+
+  await expect(page.locator(".footer_copy")).toHaveText(footerText);
+});
 
 // test("Check sorting tab works", async ({ page }) => {
 //   console.log("placeholder");
