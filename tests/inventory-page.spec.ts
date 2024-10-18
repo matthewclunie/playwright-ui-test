@@ -223,9 +223,73 @@ test("Check footer", async ({ page }) => {
   await expect(page.locator(".footer_copy")).toHaveText(footerText);
 });
 
-// test("Check sorting tab works", async ({ page }) => {
-//   console.log("placeholder");
-// });
+test("Check sorting tab works", async ({ page }) => {
+  await page.goto("https://www.saucedemo.com/inventory.html");
+  const activeSelector = page.locator(".active_option");
+  const dropdownOptions = page.locator(".product_sort_container");
+  const productLabels = page.locator(".inventory_item_name ");
+  const productPrices = page.locator(".inventory_item_price");
+  const productLabelTexts = await productLabels.allInnerTexts();
+  const productPriceTexts = await productPrices.allInnerTexts();
+
+  const sortedProductLabels = [...productLabelTexts].sort();
+
+  const revSortedProductLabels = sortedProductLabels.reverse();
+
+  console.log("labels", productLabelTexts, productPriceTexts);
+  console.log("sorted", sortedProductLabels, revSortedProductLabels);
+
+  const sortedPrices = [
+    "$7.99",
+    "$9.99",
+    "$15.99",
+    "$15.99",
+    "$29.99",
+    "$49.99",
+  ];
+
+  const revSortedPrices = [
+    "$49.99",
+    "$29.99",
+    "$15.99",
+    "$15.99",
+    "$9.99",
+    "$7.99",
+  ];
+
+  const dropdownSelects = [
+    {
+      value: "az",
+      text: "Name (A to Z)",
+      sortBy: productLabelTexts,
+      sorted: sortedProductLabels,
+    },
+    {
+      value: "za",
+      text: "Name (Z to A)",
+      sortBy: productLabelTexts,
+      sorted: revSortedProductLabels,
+    },
+    {
+      value: "lohi",
+      text: "Price (low to high)",
+      sortBy: productPriceTexts,
+      sorted: sortedPrices,
+    },
+    {
+      value: "hilo",
+      text: "Price (high to low)",
+      sortBy: productPriceTexts,
+      sorted: revSortedPrices,
+    },
+  ];
+
+  for (const select of dropdownSelects) {
+    await dropdownOptions.selectOption(select.value);
+    await expect(activeSelector).toHaveText(select.text);
+    await expect(select.sortBy).toEqual(select.sorted);
+  }
+});
 
 // test("Check shopping cart works", async ({ page }) => {
 //   console.log("placeholder");
