@@ -229,68 +229,61 @@ test("Check sorting tab works", async ({ page }) => {
   const dropdownOptions = page.locator(".product_sort_container");
   const productLabels = page.locator(".inventory_item_name ");
   const productPrices = page.locator(".inventory_item_price");
-  const productLabelTexts = await productLabels.allInnerTexts();
-  const productPriceTexts = await productPrices.allInnerTexts();
 
-  const sortedProductLabels = [...productLabelTexts].sort();
+  const getProductLabelTexts = async () => {
+    return await productLabels.allInnerTexts();
+  };
 
-  const revSortedProductLabels = sortedProductLabels.reverse();
+  const getProductPriceTexts = async () => {
+    return await productPrices.allInnerTexts();
+  };
 
-  console.log("labels", productLabelTexts, productPriceTexts);
-  console.log("sorted", sortedProductLabels, revSortedProductLabels);
+  const sortedProductLabels = [...(await getProductLabelTexts())].sort();
+  const revSortedProductLabels = [...sortedProductLabels].reverse();
 
-  const sortedPrices = [
-    "$7.99",
-    "$9.99",
-    "$15.99",
-    "$15.99",
-    "$29.99",
-    "$49.99",
-  ];
+  const sortedPrices = [...(await getProductPriceTexts())].sort((a, b) => {
+    const numA = parseFloat(a.replace("$", ""));
+    const numB = parseFloat(b.replace("$", ""));
+    return numA - numB;
+  });
 
-  const revSortedPrices = [
-    "$49.99",
-    "$29.99",
-    "$15.99",
-    "$15.99",
-    "$9.99",
-    "$7.99",
-  ];
+  const revSortedPrices = [...sortedPrices].reverse();
 
   const dropdownSelects = [
     {
       value: "az",
       text: "Name (A to Z)",
-      sortBy: productLabelTexts,
-      sorted: sortedProductLabels,
+      getTexts: getProductLabelTexts,
+      sortedTexts: sortedProductLabels,
     },
     {
       value: "za",
       text: "Name (Z to A)",
-      sortBy: productLabelTexts,
-      sorted: revSortedProductLabels,
+      getTexts: getProductLabelTexts,
+      sortedTexts: revSortedProductLabels,
     },
     {
       value: "lohi",
       text: "Price (low to high)",
-      sortBy: productPriceTexts,
-      sorted: sortedPrices,
+      getTexts: getProductPriceTexts,
+      sortedTexts: sortedPrices,
     },
     {
       value: "hilo",
       text: "Price (high to low)",
-      sortBy: productPriceTexts,
-      sorted: revSortedPrices,
+      getTexts: getProductPriceTexts,
+      sortedTexts: revSortedPrices,
     },
   ];
 
   for (const select of dropdownSelects) {
     await dropdownOptions.selectOption(select.value);
     await expect(activeSelector).toHaveText(select.text);
-    await expect(select.sortBy).toEqual(select.sorted);
+    const texts = await select.getTexts();
+    await expect(texts).toEqual(select.sortedTexts);
   }
-});
 
-// test("Check shopping cart works", async ({ page }) => {
-//   console.log("placeholder");
-// });
+  // test("Check shopping cart works", async ({ page }) => {
+  //   console.log("placeholder");
+  // });
+});
