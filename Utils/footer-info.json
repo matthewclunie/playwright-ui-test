@@ -1,0 +1,11 @@
+[
+  { "identifier": ".social_twitter", "url": "https://x.com/saucelabs?mx=2" },
+  {
+    "identifier": ".social_facebook",
+    "url": "https://www.facebook.com/saucelabs"
+  },
+  {
+    "identifier": ".social_linkedin",
+    "url": "https://www.linkedin.com/company/sauce-labs/"
+  }
+]
