@@ -2,7 +2,7 @@ import { Page } from "playwright";
 
 import { InventoryPage } from "../page-objects/inventory-page-utils";
 
-class PageObjectsManager {
+export class PageObjectsManager {
   page: Page;
   inventoryPage: InventoryPage;
 

@@ -2,9 +2,6 @@ import { Locator, Page } from "playwright";
 
 const { test, expect } = require("@playwright/test");
 
-const optionsJSON = require("../Utils/dropdown-info.json");
-const optionsData = JSON.parse(JSON.stringify(optionsJSON));
-
 const productsJSON = require("../Utils/product-info.json");
 const productsData = JSON.parse(JSON.stringify(productsJSON));
 

@@ -13,7 +13,7 @@ const footerData = JSON.parse(JSON.stringify(footerJSON));
 interface DropdownSelects {
   value: string;
   text: string;
-  getTexts: Promise<string[]>;
+  getTexts: () => Promise<string[]>;
   sortedTexts: string[];
 }
 
@@ -111,7 +111,7 @@ export class InventoryPage {
     );
 
     for (let i = 0; i < addToCartButtonsCount; i++) {
-      const addToCartButton = await addToCartButtons.nth(i);
+      const addToCartButton = addToCartButtons.nth(i);
       await expect(addToCartButton).toHaveText("Remove");
       await addToCartButton.click();
       badgeCount--;
@@ -230,35 +230,87 @@ export class InventoryPage {
     return await productPrices.allInnerTexts();
   }
 
-  getSortedProductLabels(productLabels: string) {
+  getSortedProductLabels(productLabels: string[]) {
     return [...productLabels].sort();
   }
 
-  getRevSortedProductLabels(sortedLabels: string) {
+  getRevSortedProductLabels(sortedLabels: string[]) {
     return [...sortedLabels].reverse();
   }
 
-  getSortedPrices(productPrices: string) {
-    [...productPrices].sort((a, b) => {
+  getSortedPrices(productPrices: string[]) {
+    return [...productPrices].sort((a, b) => {
       const priceA = parseFloat(a.replace("$", ""));
       const priceB = parseFloat(b.replace("$", ""));
       return priceA - priceB;
     });
   }
 
-  getRevSortedPrices(sortedPrices: string) {
+  getRevSortedPrices(sortedPrices: number[]) {
     return [...sortedPrices].reverse();
   }
 
-  async checkDropdownFunctionality(dropdownSelects: any) {
+  async checkDropdownFunctionality(dropdownSelects: DropdownSelects[]) {
     const activeSelector = this.page.locator(".active_option");
-    const dropdownOptions = this.page.locator(".product_sort_container");
+    const dropdown = this.page.locator(".product_sort_container");
 
     for (const select of dropdownSelects) {
-      await dropdownOptions.selectOption(select.value);
+      await dropdown.selectOption(select.value);
       await expect(activeSelector).toHaveText(select.text);
       const texts = await select.getTexts();
       expect(texts).toEqual(select.sortedTexts);
+    }
+  }
+
+  async addAllItemsToCart() {
+    const addToCartButtons = this.page.locator(".btn_inventory");
+    const addToCartButtonsCount = await addToCartButtons.count();
+    for (let i = 0; i < addToCartButtonsCount; i++) {
+      const addToCartButton = addToCartButtons.nth(i);
+      await addToCartButton.click();
+    }
+    await expect(this.page.locator(".shopping_cart_badge")).toHaveText(
+      addToCartButtonsCount.toString()
+    );
+  }
+
+  async checkClickShoppingCartLink() {
+    await this.page.locator(".shopping_cart_link").click();
+    await expect(this.page).toHaveURL("https://www.saucedemo.com/cart.html");
+  }
+
+  async checkBasicShoppingCartContent() {
+    await expect(this.page.locator(".title")).toHaveText("Your Cart");
+    await expect(this.page.locator(".cart_quantity_label")).toHaveText("QTY");
+    await expect(this.page.locator(".cart_desc_label")).toHaveText(
+      "Description"
+    );
+    await expect(this.page.locator("#continue-shopping")).toHaveText(
+      "Continue Shopping"
+    );
+    await expect(this.page.locator("#checkout")).toHaveText("Checkout");
+  }
+
+  async checkShoppingCartQuantities() {
+    const cartQuantities = this.page.locator(".cart_quantity");
+    const cartQuantitiesCount = await this.page
+      .locator(".cart_quantity")
+      .count();
+
+    for (let i = 0; i < cartQuantitiesCount; i++) {
+      const cartQty = cartQuantities.nth(i);
+      await expect(cartQty).toHaveText("1");
+    }
+  }
+
+  async checkCartItemContent() {
+    const cartItems = this.page.locator(".cart_item");
+    const cartItemsCount = await cartItems.count();
+
+    for (let i = 0; i < cartItemsCount; i++) {
+      const cartItem = cartItems.nth(i);
+      await this.checkProductDetails(cartItem, i);
+      expect(cartItem.locator(".cart_button")).toHaveText("Remove");
     }
   }
 }
