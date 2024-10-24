@@ -1,6 +1,6 @@
 import { Page } from "playwright";
 import { expect } from "playwright/test";
-import footerJSON from "./dropdown-info.json";
+import footerJSON from "../data/footer-info.json";
 
 const footerData = JSON.parse(JSON.stringify(footerJSON));
 

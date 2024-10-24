@@ -16,11 +16,11 @@ test("Check product links work", async ({ page }) => {
     await productLink.click();
     await productUtils.checkproductUtilsContent(i);
 
-    await productUtils.addItemFromproductUtils();
+    await productUtils.addItemFromProductUtils();
     await shoppingCartUtils.checkClickShoppingCartLink();
     await productUtils.checkProductDetails(page, i);
     await page.goBack();
-    await productUtils.removeItemFromproductUtils();
+    await productUtils.removeItemFromProductUtils();
     await page.locator("#back-to-products").click();
   }
 });

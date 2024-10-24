@@ -1,7 +1,7 @@
 import { Page } from "playwright";
 import { expect, Locator } from "playwright/test";
-import productsJSON from "./product-info.json";
-import optionsJSON from "./dropdown-info.json";
+import productsJSON from "../data/product-info.json";
+import optionsJSON from "../data/dropdown-info.json";
 
 const optionsData = JSON.parse(JSON.stringify(optionsJSON));
 const productsData = JSON.parse(JSON.stringify(productsJSON));
@@ -39,14 +39,14 @@ export class ProductUtils {
     );
   }
 
-  async addItemFromproductUtils() {
+  async addItemFromProductUtils() {
     await expect(this.page.locator("#add-to-cart")).toHaveText("Add to cart");
     await this.page.locator("#add-to-cart").click();
     await expect(this.page.locator(".shopping_cart_badge")).toHaveText("1");
     await expect(this.page.locator("#remove")).toHaveText("Remove");
   }
 
-  async removeItemFromproductUtils() {
+  async removeItemFromProductUtils() {
     await this.page.locator("#remove").click();
     await expect(this.page.locator("#add-to-cart")).toHaveText("Add to cart");
     await expect(this.page.locator(".shopping_cart_badge")).not.toBeVisible();
