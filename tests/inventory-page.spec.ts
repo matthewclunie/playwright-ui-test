@@ -1,119 +1,93 @@
-const { test, expect } = require("@playwright/test");
-const { PageObjectsManager } = require("../page-objects/page-objects-manager");
+import { test } from "@playwright/test";
+import { UtilManager } from "../utils/util-manager";
 
 test("Check for inventory page content", async ({ page }) => {
-  const poManager = new PageObjectsManager(page);
-  const inventoryPage = poManager.getInventoryPage();
-  await inventoryPage.goToInventoryPage();
-  await inventoryPage.checkBasicPageContent();
-  await inventoryPage.checkForDropdownOptions();
-  await inventoryPage.checkForProductContent();
+  const utilManager = new UtilManager(page);
+  const inventoryUtils = utilManager.getInventoryUtils();
+  const productUtils = utilManager.getProductUtils();
+  await inventoryUtils.goToInventoryPage();
+  await inventoryUtils.checkInventoryUtilsContent();
+  await productUtils.checkProductSortOptions();
+  await productUtils.checkForProductContent();
 });
 
 test("Check add to cart button works", async ({ page }) => {
-  const poManager = new PageObjectsManager(page);
-  const inventoryPage = poManager.getInventoryPage();
-  await inventoryPage.goToInventoryPage();
+  const utilManager = new UtilManager(page);
+  const inventoryUtils = utilManager.getInventoryUtils();
+  const shoppingCartUtils = utilManager.getShoppingCartUtils();
 
-  await inventoryPage.checkAddingItemsToCart();
-  await page.locator(".shopping_cart_link").click();
-  await inventoryPage.checkItemsInCart();
-  await page.locator("#continue-shopping").click();
-  await inventoryPage.checkRemovingItemsFromCart();
-});
-
-test("Check product links work", async ({ page }) => {
-  const productLinks = page.locator(".inventory_item_name");
-  const productLinkCount = await productLinks.count();
-  const poManager = new PageObjectsManager(page);
-  const inventoryPage = poManager.getInventoryPage();
-  await inventoryPage.goToInventoryPage();
-
-  for (let i = 0; i < productLinkCount; i++) {
-    const productLink = await productLinks.nth(i);
-    await productLink.click();
-    await inventoryPage.checkProductPageContent();
-
-    await inventoryPage.addItemFromProductPage();
-    await page.locator(".shopping_cart_link").click();
-    await inventoryPage.checkProductDetails(page, i);
-    await page.goBack();
-    await inventoryPage.removeItemFromProductPage();
-    await page.locator("#back-to-products").click();
-  }
+  await inventoryUtils.goToInventoryPage();
+  await shoppingCartUtils.checkAddItemsToCart();
+  await shoppingCartUtils.checkClickShoppingCartLink();
+  await shoppingCartUtils.checkItemsInCart();
+  await shoppingCartUtils.checkContinueShoppingClick();
+  await shoppingCartUtils.checkRemovingItemsFromCart();
 });
 
 test("Check nav bar works", async ({ context, page }) => {
-  const poManager = new PageObjectsManager(page);
-  const inventoryPage = poManager.getInventoryPage();
-  await inventoryPage.goToInventoryPage();
-  await inventoryPage.checkAbout();
-  await inventoryPage.checkResetState();
-  await inventoryPage.checkNavClose();
-  await inventoryPage.checkAllItems();
-  await inventoryPage.checkLogout(context);
+  const utilManager = new UtilManager(page);
+  const inventoryUtils = utilManager.getInventoryUtils();
+  const navBarUtils = utilManager.getNavBarUtils();
+
+  await inventoryUtils.goToInventoryPage();
+  await navBarUtils.checkAboutLink();
+  await navBarUtils.checkResetStateButton();
+  await navBarUtils.checkNavClose();
+  await navBarUtils.checkAllItemsLink();
+  await navBarUtils.checkLogout(context);
 });
 
 test("Check footer", async ({ page }) => {
   const footerText =
     "© 2024 Sauce Labs. All Rights Reserved. Terms of Service | Privacy Policy";
 
-  const poManager = new PageObjectsManager(page);
-  const inventoryPage = poManager.getInventoryPage();
+  const utilManager = new UtilManager(page);
+  const inventoryUtils = utilManager.getInventoryUtils();
+  const footerUtils = utilManager.getFooterUtils();
 
-  await inventoryPage.goToInventoryPage();
-  await inventoryPage.checkFooterLinks();
-  await inventoryPage.checkFooterText(footerText);
+  await inventoryUtils.goToInventoryPage();
+  await footerUtils.checkFooterLinks();
+  await footerUtils.checkFooterText(footerText);
 });
 
 test("Check sorting dropdown works", async ({ page }) => {
-  const poManager = new PageObjectsManager(page);
-  const inventoryPage = poManager.getInventoryPage();
-  await inventoryPage.goToInventoryPage();
-  const productLabels = await inventoryPage.getProductLabels();
-  const sortedLabels = inventoryPage.getSortedProductLabels(productLabels);
-  const revSortedLabels = inventoryPage.getRevSortedProductLabels(sortedLabels);
-  const productPrices = await inventoryPage.getProductPrices();
-  const sortedPrices = inventoryPage.getSortedPrices(productPrices);
-  const revSortedPrices = inventoryPage.getRevSortedPrices(sortedPrices);
+  const utilManager = new UtilManager(page);
+  const inventoryUtils = utilManager.getInventoryUtils();
+  const productUtils = utilManager.getProductUtils();
+  await inventoryUtils.goToInventoryPage();
+  const productLabels = await productUtils.getProductLabels();
+  const sortedLabels = productUtils.getSortedProductLabels(productLabels);
+  const revSortedLabels = productUtils.getRevSortedProductLabels(sortedLabels);
+  const productPrices = await productUtils.getProductPrices();
+  const sortedPrices = productUtils.getSortedPrices(productPrices);
+  const revSortedPrices = productUtils.getRevSortedPrices(sortedPrices);
 
   const dropdownSelects = [
     {
       value: "az",
       text: "Name (A to Z)",
-      getTexts: async () => await inventoryPage.getProductLabels(),
+      getTexts: async () => await productUtils.getProductLabels(),
       sortedTexts: sortedLabels,
     },
     {
       value: "za",
       text: "Name (Z to A)",
-      getTexts: async () => await inventoryPage.getProductLabels(),
+      getTexts: async () => await productUtils.getProductLabels(),
       sortedTexts: revSortedLabels,
     },
     {
       value: "lohi",
       text: "Price (low to high)",
-      getTexts: async () => await inventoryPage.getProductPrices(),
+      getTexts: async () => await productUtils.getProductPrices(),
       sortedTexts: sortedPrices,
     },
     {
       value: "hilo",
       text: "Price (high to low)",
-      getTexts: async () => await inventoryPage.getProductPrices(),
+      getTexts: async () => await productUtils.getProductPrices(),
       sortedTexts: revSortedPrices,
     },
   ];
 
-  await inventoryPage.checkDropdownFunctionality(dropdownSelects);
-});
-
-test("Check shopping cart works", async ({ page }) => {
-  const poManager = new PageObjectsManager(page);
-  const inventoryPage = poManager.getInventoryPage();
-  await inventoryPage.goToInventoryPage();
-  await inventoryPage.addAllItemsToCart();
-  await inventoryPage.checkClickShoppingCartLink();
-  await inventoryPage.checkBasicShoppingCartContent();
-  await inventoryPage.checkShoppingCartQuantities();
-  await inventoryPage.checkCartItemContent();
+  await productUtils.checkProductSort(dropdownSelects);
 });

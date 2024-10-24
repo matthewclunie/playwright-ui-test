@@ -1,8 +1,7 @@
-import { Locator, Page } from "playwright";
+import { test, expect } from "@playwright/test";
+import productsJSON from "../data/product-info.json";
+import { UtilManager } from "../utils/util-manager";
 
-const { test, expect } = require("@playwright/test");
-
-const productsJSON = require("../Utils/product-info.json");
 const productsData = JSON.parse(JSON.stringify(productsJSON));
 
 test("Check for shopping cart content", async ({ page }) => {
@@ -17,8 +16,8 @@ test("Check for shopping cart content", async ({ page }) => {
   await page.locator(".shopping_cart_link").click();
   await expect(page).toHaveURL("https://www.saucedemo.com/cart.html");
   await expect(page.locator(".title")).toHaveText("Your Cart");
-  await expect(".cart_quantity_label").toHaveText("QTY");
-  await expect(".cart_desc_label").toHaveText("Description");
+  await expect(page.locator(".cart_quantity_label")).toHaveText("QTY");
+  await expect(page.locator(".cart_desc_label")).toHaveText("Description");
   await expect(page.locator("#continue-shopping")).toHaveText(
     "Continue Shopping"
   );
@@ -48,15 +47,27 @@ test("Check for shopping cart content", async ({ page }) => {
   }
 });
 
+// test("Check shopping cart works", async ({ page }) => {
+//   await page.goto("https://www.saucedemo.com/inventory.html");
+//   const addToCartButtons = page.locator(".btn_inventory");
+//   const addToCartButtonsCount = await addToCartButtons.count();
+//   for (let i = 0; i < addToCartButtonsCount; i++) {
+//     const addToCartButton = await addToCartButtons.nth(i);
+//     await addToCartButton.click();
+//   }
+//   await expect(page.locator(".shopping_cart_badge")).toHaveText("6");
+//   await page.locator(".shopping_cart_link").click();
+//   await expect(page).toHaveURL("https://www.saucedemo.com/cart.html");
+// });
+
 test("Check shopping cart works", async ({ page }) => {
-  await page.goto("https://www.saucedemo.com/inventory.html");
-  const addToCartButtons = page.locator(".btn_inventory");
-  const addToCartButtonsCount = await addToCartButtons.count();
-  for (let i = 0; i < addToCartButtonsCount; i++) {
-    const addToCartButton = await addToCartButtons.nth(i);
-    await addToCartButton.click();
-  }
-  await expect(page.locator(".shopping_cart_badge")).toHaveText("6");
-  await page.locator(".shopping_cart_link").click();
-  await expect(page).toHaveURL("https://www.saucedemo.com/cart.html");
+  const utilManager = new UtilManager(page);
+  const inventoryUtils = utilManager.getInventoryUtils();
+  const shoppingCartUtils = utilManager.getShoppingCartUtils();
+  await inventoryUtils.goToInventoryPage();
+  await shoppingCartUtils.addAllItemsToCart();
+  await shoppingCartUtils.checkClickShoppingCartLink();
+  await shoppingCartUtils.checkBasicShoppingCartContent();
+  await shoppingCartUtils.checkShoppingCartQuantities();
+  await shoppingCartUtils.checkCartItemsContent();
 });

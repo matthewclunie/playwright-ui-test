@@ -1,13 +1,13 @@
 import { Page } from "playwright";
+import { test, expect } from "@playwright/test";
+import loginJSON from "../data/login-info.json";
+import lockedOutJSON from "../data/bad-login-info.json";
 
 interface LoginData {
   userName: string;
   password: string;
 }
 
-const { test, expect } = require("@playwright/test");
-const loginJSON = require("../Utils/login-info.json");
-const lockedOutJSON = require("../Utils/bad-login-info.json");
 const loginData = JSON.parse(JSON.stringify(loginJSON));
 const badUserData = JSON.parse(JSON.stringify(lockedOutJSON));
 
