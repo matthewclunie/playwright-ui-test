@@ -11,14 +11,15 @@ interface LoginData {
 const loginData = JSON.parse(JSON.stringify(loginJSON));
 const badUserData = JSON.parse(JSON.stringify(lockedOutJSON));
 
-const errorMessageCheck = async (page: Page) => {
-  const errorInputIcon = page.locator(".svg-inline--fa");
+const errorMessageCheck = async (page: Page, expectedError: string) => {
+  const errorInputIcon = page.locator(".error_icon");
   await expect(errorInputIcon.first()).toBeVisible();
   await expect(errorInputIcon.nth(1)).toBeVisible();
-  const errorButton = page.locator('[data-test="error-button"]');
-  await expect(errorButton).toBeVisible();
-  await errorButton.click();
-  await expect(errorButton).not.toBeVisible();
+  await expect(page.locator('[data-test="error"]')).toHaveText(expectedError);
+  const errorCloseButton = page.locator('[data-test="error-button"]');
+  await expect(errorCloseButton).toBeVisible();
+  await errorCloseButton.click();
+  await expect(errorCloseButton).not.toBeVisible();
 };
 
 const login = async (page: Page, userName: string, password: string) => {
@@ -30,6 +31,7 @@ const login = async (page: Page, userName: string, password: string) => {
 test("Check for login page content", async ({ page }) => {
   await page.goto("https://www.saucedemo.com/");
   await expect(page.locator(".login_logo")).toHaveText("Swag Labs");
+
   await expect(page.getByPlaceholder("Username")).toBeVisible();
   await expect(page.getByPlaceholder("Password")).toBeVisible();
   await expect(page.getByRole("button", { name: "Login" })).toBeVisible();
@@ -52,40 +54,25 @@ test("incorrect username correct password", async ({ page }) => {
     badUserData.incorrect_userName.password
   );
   await page.getByRole("button", { name: "Login" }).click();
-  await expect(page.getByRole("heading", { level: 3 })).toHaveText(
-    badUserData.incorrect_userName.errorMessage
-  );
-  await errorMessageCheck(page);
+  await errorMessageCheck(page, badUserData.incorrect_userName.errorMessage);
 });
 
 test("correct username incorrect password", async ({ page }) => {
-  const errorInputIcon = page.locator(".svg-inline--fa");
   await login(
     page,
     badUserData.incorrect_password.userName,
     badUserData.incorrect_password.password
   );
   await page.getByRole("button", { name: "Login" }).click();
-  await expect(errorInputIcon.first()).toBeVisible();
-  await expect(errorInputIcon.nth(1)).toBeVisible();
-  await expect(page.getByRole("heading", { level: 3 })).toHaveText(
-    badUserData.incorrect_userName.errorMessage
-  );
-  await errorMessageCheck(page);
+  await errorMessageCheck(page, badUserData.incorrect_userName.errorMessage);
 });
 
 test("error text should appear for locked_out_user", async ({ page }) => {
-  const errorInputIcon = page.locator(".svg-inline--fa");
   await login(
     page,
     badUserData.locked_out_user.userName,
     badUserData.locked_out_user.password
   );
   await page.locator("#login-button").click();
-  await expect(errorInputIcon.first()).toBeVisible();
-  await expect(errorInputIcon.nth(1)).toBeVisible();
-  await expect(
-    page.getByText(badUserData.locked_out_user.errorMessage)
-  ).toHaveText(badUserData.locked_out_user.errorMessage);
-  await errorMessageCheck(page);
+  await errorMessageCheck(page, badUserData.locked_out_user.errorMessage);
 });
