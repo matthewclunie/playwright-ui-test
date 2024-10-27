@@ -1,6 +1,7 @@
 import { test, expect } from "@playwright/test";
 import {
   checkAddAllItemsToCart,
+  checkClickShoppingCartLink,
   checkProductDetails,
   goToInventoryPage,
 } from "../utils/utils";
@@ -8,10 +9,13 @@ import {
 test("Check shopping cart works", async ({ page }) => {
   await goToInventoryPage(page);
 
-  //checkAddAllItemsToCart
+  //Add all items to cart
   await checkAddAllItemsToCart(page);
 
-  //checkBasicShoppingCartContent
+  //Go to Shopping Cart
+  await checkClickShoppingCartLink(page);
+
+  //Check basic shopping cart content
   await expect(page.locator(".title")).toHaveText("Your Cart");
   await expect(page.locator(".cart_quantity_label")).toHaveText("QTY");
   await expect(page.locator(".cart_desc_label")).toHaveText("Description");
@@ -20,7 +24,7 @@ test("Check shopping cart works", async ({ page }) => {
   );
   await expect(page.locator("#checkout")).toHaveText("Checkout");
 
-  //checkShoppingCartQuantities
+  //Check accurate quantities for each cart item
   const cartQuantities = page.locator(".cart_quantity");
   const cartQuantitiesCount = await page.locator(".cart_quantity").count();
 
@@ -29,13 +33,13 @@ test("Check shopping cart works", async ({ page }) => {
     await expect(cartQty).toHaveText("1");
   }
 
-  //checkCartItemsContent
+  //Check shopping cart product content
   const cartItems = page.locator(".cart_item");
   const cartItemsCount = await cartItems.count();
 
   for (let i = 0; i < cartItemsCount; i++) {
     const cartItem = cartItems.nth(i);
     await checkProductDetails(cartItem, i);
-    expect(cartItem.locator(".cart_button")).toHaveText("Remove");
+    await expect(cartItem.locator(".cart_button")).toHaveText("Remove");
   }
 });

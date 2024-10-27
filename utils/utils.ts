@@ -5,19 +5,19 @@ const productsData = JSON.parse(JSON.stringify(productsJSON));
 export const checkProductDetails = async (
   element: Locator | Page,
   i: number,
-  src?: string
+  imgIdentifier?: string
 ) => {
-  await expect(element.locator(".inventory_item_name")).toHaveText(
+  await expect(element.locator('[data-test="inventory-item-name"]')).toHaveText(
     productsData[i].title
   );
-  await expect(element.locator(".inventory_item_desc")).toHaveText(
+  await expect(element.locator('[data-test="inventory-item-desc"]')).toHaveText(
     productsData[i].description
   );
-  await expect(element.locator(".inventory_item_price")).toHaveText(
-    productsData[i].price
-  );
-  if (src) {
-    await expect(element.locator("img.inventory_item_img")).toHaveAttribute(
+  await expect(
+    element.locator('[data-test="inventory-item-price"]')
+  ).toHaveText(productsData[i].price);
+  if (imgIdentifier) {
+    await expect(element.locator(imgIdentifier)).toHaveAttribute(
       "src",
       productsData[i].imageSrc
     );

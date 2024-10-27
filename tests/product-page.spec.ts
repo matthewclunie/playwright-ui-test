@@ -16,26 +16,26 @@ test("Check product links work", async ({ page }) => {
     const productLink = productLinks.nth(i);
     await productLink.click();
 
-    //checkProductUtilsContent -- fix checkProductDetails
+    //Check product page content
     await expect(page).toHaveURL(
       `https://www.saucedemo.com/inventory-item.html?id=${productsData[i].id}`
     );
-    await checkProductDetails(productLink, i, "src");
+    await checkProductDetails(page, i, ".inventory_details_img");
 
-    //addItemFromProductUtils
+    //Add item from product page
     await expect(page.locator("#add-to-cart")).toHaveText("Add to cart");
     await page.locator("#add-to-cart").click();
     await expect(page.locator(".shopping_cart_badge")).toHaveText("1");
     await expect(page.locator("#remove")).toHaveText("Remove");
 
-    //checkClickShoppingCartLink
+    //Navigate to shopping cart
     await checkClickShoppingCartLink(page);
 
-    //checkProductDetails
+    //Check item successfully appears on shopping cart page
     await checkProductDetails(page, i);
     await page.goBack();
 
-    //removeItemFromProductUtils
+    //Remove item from product page
     await page.locator("#remove").click();
     await expect(page.locator("#add-to-cart")).toHaveText("Add to cart");
     await expect(page.locator(".shopping_cart_badge")).not.toBeVisible();
