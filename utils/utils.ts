@@ -51,7 +51,7 @@ export const goToInventoryPage = async (page: Page) => {
 };
 
 export const getLocalStorageData = async (page: Page) => {
-  await page.evaluate(() => {
+  return await page.evaluate(() => {
     return JSON.parse(JSON.stringify(localStorage));
   });
 };
