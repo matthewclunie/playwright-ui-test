@@ -49,3 +49,9 @@ export const checkClickShoppingCartLink = async (page: Page) => {
 export const goToInventoryPage = async (page: Page) => {
   await page.goto("https://www.saucedemo.com/inventory.html");
 };
+
+export const getLocalStorageData = async (page: Page) => {
+  await page.evaluate(() => {
+    return JSON.parse(JSON.stringify(localStorage));
+  });
+};

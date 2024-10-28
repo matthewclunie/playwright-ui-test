@@ -4,6 +4,7 @@ import {
   checkAddAllItemsToCart,
   checkClickShoppingCartLink,
   goToInventoryPage,
+  getLocalStorageData,
 } from "../utils/utils";
 import footerJSON from "../data/footer-info.json";
 import optionsJSON from "../data/dropdown-info.json";
@@ -62,6 +63,9 @@ test("Check add to cart button works", async ({ page }) => {
   //Navigate to shopping cart page
   await checkClickShoppingCartLink(page);
 
+  //ADD LOCAL STORAGE CHECK HERE
+  const localStorageData = getLocalStorageData(page);
+
   //Check all items in cart
   const cartProducts = page.locator(".cart_item");
   const cartProductsCount = await cartProducts.count();
@@ -119,7 +123,6 @@ test("Check nav bar works", async ({ context, page }) => {
 
   //Check inventory link
   await checkClickShoppingCartLink(page);
-  await expect(page).toHaveURL("https://www.saucedemo.com/cart.html");
   await page.locator("#react-burger-menu-btn").click();
   await page.locator("#inventory_sidebar_link").click();
   await expect(page.locator(".bm-item-list")).not.toBeVisible();

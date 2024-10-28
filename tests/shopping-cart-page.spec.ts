@@ -4,6 +4,7 @@ import {
   checkClickShoppingCartLink,
   checkProductDetails,
   goToInventoryPage,
+  getLocalStorageData,
 } from "../utils/utils";
 
 test("Check shopping cart works", async ({ page }) => {
@@ -42,4 +43,15 @@ test("Check shopping cart works", async ({ page }) => {
     await checkProductDetails(cartItem, i);
     await expect(cartItem.locator(".cart_button")).toHaveText("Remove");
   }
+
+  //ADD LOCAL STORAGE CHECK HERE
+  const localStorageData = getLocalStorageData(page);
+});
+
+test("Check if there are no products in cart", async ({ context, page }) => {
+  await goToInventoryPage(page);
+  await page.goto("https://www.saucedemo.com/cart.html");
+  await expect(page.locator(".cart_item")).not.toBeVisible();
+  const localStorageData = getLocalStorageData(page);
+  expect(localStorageData["cart-contents"]).toBeFalsy();
 });
