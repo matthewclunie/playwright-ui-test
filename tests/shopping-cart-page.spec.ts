@@ -4,7 +4,8 @@ import {
   checkClickShoppingCartLink,
   checkProductDetails,
   goToInventoryPage,
-  getLocalStorageData,
+  getLocalStorageCart,
+  checkLocalStorageCart,
 } from "../utils/utils";
 
 test("Check shopping cart works", async ({ page }) => {
@@ -44,15 +45,14 @@ test("Check shopping cart works", async ({ page }) => {
     await expect(cartItem.locator(".cart_button")).toHaveText("Remove");
   }
 
-  //ADD LOCAL STORAGE CHECK HERE
-  const localStorageData = getLocalStorageData(page);
+  //Check if local storage has correct cart
+  await checkLocalStorageCart(page);
 });
 
-test("Check if there are no products in cart", async ({ context, page }) => {
+test("Check if there are no products in cart", async ({ page }) => {
   await goToInventoryPage(page);
   await page.goto("https://www.saucedemo.com/cart.html");
   await expect(page.locator(".cart_item")).not.toBeVisible();
-  const localStorageData = await getLocalStorageData(page);
-  console.log(localStorageData);
-  expect(localStorageData["cart-contents"]).toBeFalsy();
+  const localStorageCart = await getLocalStorageCart(page);
+  expect(localStorageCart).toBeFalsy();
 });

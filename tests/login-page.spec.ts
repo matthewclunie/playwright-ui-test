@@ -8,8 +8,19 @@ interface LoginData {
   password: string;
 }
 
-const loginData = JSON.parse(JSON.stringify(loginJSON));
-const badUserData = JSON.parse(JSON.stringify(lockedOutJSON));
+interface BadUser {
+  userName: string;
+  password: string;
+  errorMessage: string;
+}
+interface BadUserData {
+  locked_out_user: BadUser;
+  incorrect_userName: BadUser;
+  incorrect_password: BadUser;
+}
+
+const loginData: LoginData[] = JSON.parse(JSON.stringify(loginJSON));
+const badUserData: BadUserData = JSON.parse(JSON.stringify(lockedOutJSON));
 
 const errorMessageCheck = async (page: Page, expectedError: string) => {
   const errorInputIcon = page.locator(".error_icon");

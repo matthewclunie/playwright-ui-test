@@ -4,13 +4,23 @@ import {
   checkAddAllItemsToCart,
   checkClickShoppingCartLink,
   goToInventoryPage,
-  getLocalStorageData,
+  checkLocalStorageCart,
 } from "../utils/utils";
 import footerJSON from "../data/footer-info.json";
 import optionsJSON from "../data/dropdown-info.json";
 
-const optionsData = JSON.parse(JSON.stringify(optionsJSON));
-const footerData = JSON.parse(JSON.stringify(footerJSON));
+interface FooterData {
+  identifier: string;
+  url: string;
+}
+
+interface OptionsData {
+  value: string;
+  text: string;
+}
+
+const optionsData: OptionsData[] = JSON.parse(JSON.stringify(optionsJSON));
+const footerData: FooterData[] = JSON.parse(JSON.stringify(footerJSON));
 
 const getProductLabels = async (page: Page) => {
   const productLabels = page.locator(".inventory_item_name ");
@@ -63,8 +73,8 @@ test("Check add to cart button works", async ({ page }) => {
   //Navigate to shopping cart page
   await checkClickShoppingCartLink(page);
 
-  //ADD LOCAL STORAGE CHECK HERE
-  const localStorageData = getLocalStorageData(page);
+  //Check if local storage has correct cart
+  await checkLocalStorageCart(page);
 
   //Check all items in cart
   const cartProducts = page.locator(".cart_item");

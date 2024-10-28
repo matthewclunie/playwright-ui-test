@@ -1,6 +1,14 @@
 import { expect, Locator, Page } from "playwright/test";
 import productsJSON from "../data/product-info.json";
-const productsData = JSON.parse(JSON.stringify(productsJSON));
+const productsData: ProductInfo[] = JSON.parse(JSON.stringify(productsJSON));
+
+export interface ProductInfo {
+  id: number;
+  title: string;
+  description: string;
+  price: string;
+  imageSrc: string;
+}
 
 export const checkProductDetails = async (
   element: Locator | Page,
@@ -50,8 +58,32 @@ export const goToInventoryPage = async (page: Page) => {
   await page.goto("https://www.saucedemo.com/inventory.html");
 };
 
-export const getLocalStorageData = async (page: Page) => {
+export const getLocalStorageCart = async (page: Page) => {
   return await page.evaluate(() => {
-    return JSON.parse(JSON.stringify(localStorage));
+    const localStorageCart = localStorage.getItem("cart-contents");
+
+    if (localStorageCart) {
+      try {
+        return JSON.parse(localStorageCart);
+      } catch {
+        console.error("Error parsing JSON");
+        return null;
+      }
+    }
   });
+};
+
+export const getItemIds = (productData: ProductInfo[]) => {
+  const ids: number[] = [];
+
+  for (let i = 0; i < productData.length; i++) {
+    ids.push(productData[i].id);
+  }
+  return ids;
+};
+
+export const checkLocalStorageCart = async (page: Page) => {
+  const localStorageCart = await getLocalStorageCart(page);
+  const productIds = getItemIds(productsData);
+  expect(localStorageCart).toEqual(productIds);
 };
