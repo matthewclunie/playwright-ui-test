@@ -5,6 +5,7 @@ import {
   checkClickShoppingCartLink,
   goToInventoryPage,
   checkLocalStorageCart,
+  checkEmptyLocalStorageCart,
 } from "../utils/utils";
 import footerJSON from "../data/footer-info.json";
 import optionsJSON from "../data/dropdown-info.json";
@@ -126,6 +127,7 @@ test("Check nav bar works", async ({ context, page }) => {
   await page.locator("#react-burger-menu-btn").click();
   await page.locator("#reset_sidebar_link").click();
   await expect(page.locator(".shopping_cart_badge")).not.toBeVisible();
+  await checkEmptyLocalStorageCart(page);
 
   //Check navbar close button
   await page.locator("#react-burger-cross-btn").click();

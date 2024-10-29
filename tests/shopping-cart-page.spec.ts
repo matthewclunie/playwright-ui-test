@@ -1,21 +1,33 @@
 import { test, expect } from "@playwright/test";
 import {
-  checkAddAllItemsToCart,
-  checkClickShoppingCartLink,
   checkProductDetails,
   goToInventoryPage,
-  getLocalStorageCart,
   checkLocalStorageCart,
+  checkEmptyLocalStorageCart,
+  checkAddAllItemsToCart,
+  getLocalStorageCart,
+  goToShoppingCart,
+  addFullCartLocalStorage,
 } from "../utils/utils";
+import { FullCart } from "../types/global";
+
+let fullCart: FullCart;
+
+test.beforeAll(async ({ browser }) => {
+  //Get localStorage full cart value dynamically
+  const context = await browser.newContext();
+  const page = await context.newPage();
+  await goToInventoryPage(page);
+  await checkAddAllItemsToCart(page);
+  fullCart = await getLocalStorageCart(page);
+});
 
 test("Check shopping cart works", async ({ page }) => {
-  await goToInventoryPage(page);
-
-  //Add all items to cart
-  await checkAddAllItemsToCart(page);
+  //Add all items to cart via localStorage beforeAll
+  await addFullCartLocalStorage(page, fullCart);
 
   //Go to Shopping Cart
-  await checkClickShoppingCartLink(page);
+  await goToShoppingCart(page);
 
   //Check basic shopping cart content
   await expect(page.locator(".title")).toHaveText("Your Cart");
@@ -50,9 +62,7 @@ test("Check shopping cart works", async ({ page }) => {
 });
 
 test("Check if there are no products in cart", async ({ page }) => {
-  await goToInventoryPage(page);
-  await page.goto("https://www.saucedemo.com/cart.html");
+  await goToShoppingCart(page);
   await expect(page.locator(".cart_item")).not.toBeVisible();
-  const localStorageCart = await getLocalStorageCart(page);
-  expect(localStorageCart).toBeFalsy();
+  await checkEmptyLocalStorageCart(page);
 });

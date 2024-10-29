@@ -2,7 +2,9 @@ import { expect, test } from "@playwright/test";
 import productsJSON from "../data/product-info.json";
 import {
   checkClickShoppingCartLink,
+  checkEmptyLocalStorageCart,
   checkProductDetails,
+  getLocalStorageCart,
   goToInventoryPage,
 } from "../utils/utils";
 const productsData = JSON.parse(JSON.stringify(productsJSON));
@@ -28,6 +30,10 @@ test("Check product links work", async ({ page }) => {
     await expect(page.locator(".shopping_cart_badge")).toHaveText("1");
     await expect(page.locator("#remove")).toHaveText("Remove");
 
+    //Check Local Storage
+    const localStorageCart = await getLocalStorageCart(page);
+    expect(localStorageCart).toEqual([productsData[i].id]);
+
     //Navigate to shopping cart
     await checkClickShoppingCartLink(page);
 
@@ -39,6 +45,7 @@ test("Check product links work", async ({ page }) => {
     await page.locator("#remove").click();
     await expect(page.locator("#add-to-cart")).toHaveText("Add to cart");
     await expect(page.locator(".shopping_cart_badge")).not.toBeVisible();
+    await checkEmptyLocalStorageCart(page);
     await page.locator("#back-to-products").click();
   }
 });

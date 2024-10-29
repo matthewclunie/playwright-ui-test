@@ -1,5 +1,6 @@
 import { expect, Locator, Page } from "playwright/test";
 import productsJSON from "../data/product-info.json";
+import { FullCart } from "../types/global";
 const productsData: ProductInfo[] = JSON.parse(JSON.stringify(productsJSON));
 
 export interface ProductInfo {
@@ -59,16 +60,14 @@ export const goToInventoryPage = async (page: Page) => {
 };
 
 export const getLocalStorageCart = async (page: Page) => {
-  return await page.evaluate(() => {
+  return await page.evaluate(async () => {
     const localStorageCart = localStorage.getItem("cart-contents");
 
     if (localStorageCart) {
-      try {
-        return JSON.parse(localStorageCart);
-      } catch {
-        console.error("Error parsing JSON");
-        return null;
-      }
+      return await JSON.parse(localStorageCart);
+    } else {
+      console.error("Error parsing JSON");
+      return null;
     }
   });
 };
@@ -86,4 +85,22 @@ export const checkLocalStorageCart = async (page: Page) => {
   const localStorageCart = await getLocalStorageCart(page);
   const productIds = getItemIds(productsData);
   expect(localStorageCart).toEqual(productIds);
+};
+
+export const checkEmptyLocalStorageCart = async (page: Page) => {
+  const localStorageCart = await getLocalStorageCart(page);
+  expect(localStorageCart).toBeFalsy();
+};
+
+export const goToShoppingCart = async (page: Page) => {
+  await page.goto("https://www.saucedemo.com/cart.html");
+};
+
+export const addFullCartLocalStorage = async (
+  page: Page,
+  fullCart: FullCart
+) => {
+  page.addInitScript((value: string) => {
+    localStorage.setItem("cart-contents", value);
+  }, JSON.stringify(fullCart));
 };
