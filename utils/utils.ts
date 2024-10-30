@@ -66,8 +66,7 @@ export const getLocalStorageCart = async (page: Page) => {
     if (localStorageCart) {
       return await JSON.parse(localStorageCart);
     } else {
-      console.error("Error parsing JSON");
-      return null;
+      return localStorageCart;
     }
   });
 };
