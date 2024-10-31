@@ -1,6 +1,7 @@
 import { expect, Locator, Page } from "playwright/test";
 import productsJSON from "../data/product-info.json";
 import { FullCart } from "../types/global";
+import { urls } from "../data/urls";
 const productsData: ProductInfo[] = JSON.parse(JSON.stringify(productsJSON));
 
 export interface ProductInfo {
@@ -52,11 +53,11 @@ export const checkAddAllItemsToCart = async (page: Page) => {
 
 export const checkClickShoppingCartLink = async (page: Page) => {
   await page.locator(".shopping_cart_link").click();
-  await expect(page).toHaveURL("https://www.saucedemo.com/cart.html");
+  await expect(page).toHaveURL(urls.cart);
 };
 
 export const goToInventoryPage = async (page: Page) => {
-  await page.goto("https://www.saucedemo.com/inventory.html");
+  await page.goto(urls.inventory);
 };
 
 export const getLocalStorageCart = async (page: Page) => {
@@ -92,14 +93,19 @@ export const checkEmptyLocalStorageCart = async (page: Page) => {
 };
 
 export const goToShoppingCart = async (page: Page) => {
-  await page.goto("https://www.saucedemo.com/cart.html");
+  await page.goto(urls.cart);
 };
 
-export const addFullCartLocalStorage = async (
-  page: Page,
-  fullCart: FullCart
-) => {
+export const addPreloadedCart = async (page: Page, fullCart: FullCart) => {
   page.addInitScript((value: string) => {
     localStorage.setItem("cart-contents", value);
   }, JSON.stringify(fullCart));
+};
+
+export const getPreloadedCart = async ({ browser }) => {
+  const context = await browser.newContext();
+  const page = await context.newPage();
+  await goToInventoryPage(page);
+  await checkAddAllItemsToCart(page);
+  return await getLocalStorageCart(page);
 };

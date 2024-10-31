@@ -9,6 +9,7 @@ import {
 } from "../utils/utils";
 import footerJSON from "../data/footer-info.json";
 import optionsJSON from "../data/dropdown-info.json";
+import { urls } from "../data/urls";
 
 interface FooterData {
   identifier: string;
@@ -88,7 +89,7 @@ test("Check add to cart button works", async ({ page }) => {
 
   //Check continue shopping button
   await page.locator("#continue-shopping").click();
-  await expect(page).toHaveURL("https://www.saucedemo.com/inventory.html");
+  await expect(page).toHaveURL(urls.inventory);
 
   //Check remove items from cart functionality
   const addToCartButtons = page.locator(".btn_inventory");
@@ -118,7 +119,7 @@ test("Check nav bar works", async ({ context, page }) => {
   //Check About Link
   await page.locator("#react-burger-menu-btn").click();
   await page.locator("#about_sidebar_link").click();
-  await expect(page).toHaveURL("https://saucelabs.com/");
+  await expect(page).toHaveURL(urls.login);
   await page.goBack();
 
   //Check reset state button
@@ -138,15 +139,15 @@ test("Check nav bar works", async ({ context, page }) => {
   await page.locator("#react-burger-menu-btn").click();
   await page.locator("#inventory_sidebar_link").click();
   await expect(page.locator(".bm-item-list")).not.toBeVisible();
-  await expect(page).toHaveURL("https://www.saucedemo.com/inventory.html");
+  await expect(page).toHaveURL(urls.inventory);
 
   //check logout functionality
-  const loggedInCookies = await context.cookies("https://www.saucedemo.com/");
+  const loggedInCookies = await context.cookies(urls.login);
   expect(loggedInCookies.length).toBeGreaterThan(0);
   await page.locator("#react-burger-menu-btn").click();
   await page.locator("#logout_sidebar_link").click();
-  await expect(page).toHaveURL("https://www.saucedemo.com/");
-  const loggedOutCookies = await context.cookies("https://www.saucedemo.com/");
+  await expect(page).toHaveURL(urls.login);
+  const loggedOutCookies = await context.cookies(urls.login);
   expect(loggedOutCookies.length).toBe(0);
 });
 

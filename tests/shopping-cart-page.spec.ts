@@ -1,30 +1,23 @@
 import { test, expect } from "@playwright/test";
 import {
   checkProductDetails,
-  goToInventoryPage,
   checkLocalStorageCart,
   checkEmptyLocalStorageCart,
-  checkAddAllItemsToCart,
-  getLocalStorageCart,
   goToShoppingCart,
-  addFullCartLocalStorage,
+  addPreloadedCart,
+  getPreloadedCart,
 } from "../utils/utils";
 import { FullCart } from "../types/global";
 
 let fullCart: FullCart;
 
 test.beforeAll(async ({ browser }) => {
-  //Get localStorage full cart value dynamically
-  const context = await browser.newContext();
-  const page = await context.newPage();
-  await goToInventoryPage(page);
-  await checkAddAllItemsToCart(page);
-  fullCart = await getLocalStorageCart(page);
+  fullCart = await getPreloadedCart({ browser });
 });
 
 test("Check shopping cart works", async ({ page }) => {
   //Add all items to cart via localStorage beforeAll
-  await addFullCartLocalStorage(page, fullCart);
+  await addPreloadedCart(page, fullCart);
 
   //Go to Shopping Cart
   await goToShoppingCart(page);

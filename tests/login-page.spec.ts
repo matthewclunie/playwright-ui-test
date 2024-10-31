@@ -2,6 +2,7 @@ import { Page } from "playwright";
 import { test, expect } from "@playwright/test";
 import loginJSON from "../data/login-info.json";
 import lockedOutJSON from "../data/bad-login-info.json";
+import { urls } from "../data/urls";
 
 interface LoginData {
   userName: string;
@@ -34,13 +35,13 @@ const errorMessageCheck = async (page: Page, expectedError: string) => {
 };
 
 const login = async (page: Page, userName: string, password: string) => {
-  await page.goto("https://www.saucedemo.com/");
+  await page.goto(urls.login);
   await page.getByPlaceholder("Username").fill(userName);
   await page.getByPlaceholder("Password").fill(password);
 };
 
 test("Check for login page content", async ({ page }) => {
-  await page.goto("https://www.saucedemo.com/");
+  await page.goto(urls.login);
   await expect(page.locator(".login_logo")).toHaveText("Swag Labs");
 
   await expect(page.getByPlaceholder("Username")).toBeVisible();
@@ -54,7 +55,7 @@ loginData.forEach((data: LoginData) => {
   test(`${data.userName} should log in successfully`, async ({ page }) => {
     await login(page, data.userName, data.password);
     await page.locator("#login-button").click();
-    await page.waitForURL("https://www.saucedemo.com/inventory.html");
+    await page.waitForURL(urls.inventory);
   });
 });
 

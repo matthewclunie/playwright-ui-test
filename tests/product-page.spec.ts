@@ -7,6 +7,7 @@ import {
   getLocalStorageCart,
   goToInventoryPage,
 } from "../utils/utils";
+import { urls } from "../data/urls";
 const productsData = JSON.parse(JSON.stringify(productsJSON));
 
 test("Check product links work", async ({ page }) => {
@@ -20,7 +21,7 @@ test("Check product links work", async ({ page }) => {
 
     //Check product page content
     await expect(page).toHaveURL(
-      `https://www.saucedemo.com/inventory-item.html?id=${productsData[i].id}`
+      `${urls.inventoryItem}?id=${productsData[i].id}`
     );
     await checkProductDetails(page, i, ".inventory_details_img");
 
